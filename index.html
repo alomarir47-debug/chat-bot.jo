@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nashama Bot AI Platform</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* الألوان الأساسية */
+            --primary-color: #ce1126; /* الأحمر الأردني */
+            --primary-dark: #a50e1e;
+            --accent-color: #007a3d; /* الأخضر */
+            --bg-main: #f4f7f9;
+            --bg-sidebar: #121212; /* لون داكن جداً للفخامة */
+            --text-sidebar: #ffffff;
+            --text-sidebar-muted: #a0a0a0;
+            --text-dark: #1a1a1a;
+            --text-medium: #555;
+            --msg-user-bg: var(--primary-color);
+            --msg-bot-bg: #ffffff;
+            --border-light: #eef2f5;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Tajawal', 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            background: var(--bg-main);
+            overflow: hidden;
+        }
+
+        html[dir="ltr"] body { font-family: 'Inter', 'Tajawal', sans-serif; }
+
+        /* ============ القائمة الجانبية (Sidebar) ============ */
+        .sidebar {
+            width: 320px; /* جعلناها أعرض قليلاً لتناسب اللوجو الكبير */
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            color: var(--text-sidebar);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            box-shadow: var(--shadow-md);
+            z-index: 10;
+            position: relative;
+            justify-content: space-between;
+        }
+        
+        /* منطقة اللوجو الكبيرة والجديدة */
+        .brand-area {
+            display: flex;
+            flex-direction: column; /* ترتيب عمودي */
+            align-items: center;    /* توسيط العناصر */
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: var(--glass-border);
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .logo-container {
+            width: 140px;  /* تكبير العرض */
+            height: 140px; /* تكبير الطول */
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%; /* شكل دائري */
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            padding: 5px;
+            /* إضافة ظل وتوهج للوجو */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 20px rgba(206, 17, 38, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-container:hover {
+            transform: scale(1.05);
+            border-color: var(--primary-color);
+        }
+        
+        .logo-container img {
+            width: 100%; height: 100%; object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .fallback-logo-icon { font-size: 60px; color: var(--primary-color); }
+
+        .brand-text h1 { 
+            font-size: 1.6rem; /* تكبير الخط */
+            font-weight: 800; 
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .brand-text .badge {
+            font-size: 0.8rem; 
+            background: var(--primary-color); 
+            color: white;
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-weight: 600; 
+            display: inline-block;
+            box-shadow: 0 2px 5px rgba(206, 17, 38, 0.4);
+        }
+
+        /* القائمة */
+        .nav-menu { flex: 1; display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .nav-label {
+            font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-sidebar-muted); margin-bottom: 5px; font-weight: 700;
+            text-align: right; /* محاذاة النص لليمين بالعربي */
+        }
+        html[dir="ltr"] .nav-label { text-align: left; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 15px;
+            padding: 14px 20px;
+            text-decoration: none;
+            color: var(--text-sidebar);
+            border-radius: 15px;
+            transition: 0.3s;
+            font-weight: 600;
+            background: rgba(255,255,255,0.03);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .nav-item i { font-size: 1.3rem; color: var(--text-sidebar-muted); }
+        .nav-item:hover, .nav-item.active {
+            background: linear-gradient(90deg, rgba(206, 17, 38, 0.2), transparent);
+            border-right: 4px solid var(--primary-color);
+            color: white;
+        }
+        html[dir="ltr"] .nav-item:hover {
+            background: linear-gradient(-90deg, rgba(206, 17, 38, 0.2), transparent);
+            border-right: none; border-left: 4px solid var(--primary-color);
+        }
+        .nav-item:hover i { color: var(--primary-color); }
+
+        /* منطقة الإعدادات */
+        .sidebar-footer {
+            padding-top: 20px;
+            border-top: var(--glass-border);
+        }
+        .settings-group {
+            background: rgba(0,0,0,0.3);
+            padding: 6px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .lang-toggle-btn {
+            flex: 1;
+            border: none; background: transparent; color: var(--text-sidebar-muted);
+            padding: 8px; border-radius: 8px; cursor: pointer; font-family: inherit; font-weight: 600;
+            transition: 0.3s;
+        }
+        .lang-toggle-btn.active {
+            background: rgba(255,255,255,0.15); color: white;
+        }
+
+        /* ============ منطقة الشات ============ */
+        .main-content {
+            flex: 1; display: flex; flex-direction: column; background: var(--bg-main); position: relative;
+        }
+        .main-content::before {
+            content: ''; position: absolute; width:100%; height:100%;
+            background-image: radial-gradient(#d9dbe4 1px, transparent 1px);
+            background-size: 35px 35px; opacity: 0.5; pointer-events: none;
+        }
+
+        .chat-header {
+            padding: 15px 30px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            display: flex; justify-content: space-between; align-items: center; z-index: 5;
+        }
+        .model-info h2 { font-size: 1.2rem; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
+        .live-indicator { width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+
+        #chat-viewport {
+            flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; scroll-behavior: smooth;
+        }
+
+        .message-group {
+            display: flex; gap: 15px; align-items: flex-start; max-width: 85%;
+            animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .message-group.user { align-self: flex-end; flex-direction: row-reverse; }
+
+        .avatar-box {
+            width: 45px; height: 45px; border-radius: 14px;
+            display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+            font-size: 22px; box-shadow: var(--shadow-sm);
+        }
+        .bot .avatar-box { background: white; color: var(--primary-color); border: 1px solid var(--border-light); }
+        .user .avatar-box { background: var(--msg-user-bg); color: white; }
+
+        .message-bubble {
+            padding: 18px 24px; border-radius: 20px;
+            font-size: 1.05rem; line-height: 1.6;
+            position: relative; box-shadow: var(--shadow-sm);
+        }
+        .bot .message-bubble { background: var(--msg-bot-bg); color: var(--text-dark); border-top-right-radius: 4px; }
+        .user .message-bubble { background: var(--msg-user-bg); color: white; border-top-left-radius: 4px; }
+        html[dir="ltr"] .bot .message-bubble { border-top-right-radius: 20px; border-top-left-radius: 4px; }
+        html[dir="ltr"] .user .message-bubble { border-top-left-radius: 20px; border-top-right-radius: 4px; }
+
+        .meta-info {
+            display: flex; align-items: center; gap: 6px;
+            margin-top: 10px; padding-top: 8px;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.75rem; font-weight: 600; color: var(--text-medium);
+        }
+        .meta-info i.ri-database-2-line { color: var(--accent-color); }
+        .meta-info i.ri-earth-line { color: var(--primary-color); }
+
+        .typing-dots { display: flex; gap: 5px; padding: 5px 0; }
+        .typing-dots span {
+            width: 8px; height: 8px; background: #ccc; border-radius: 50%;
+            animation: pulse 1.4s infinite ease-in-out both;
+        }
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes pulse { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+        .input-dock {
+            padding: 25px; z-index: 10;
+            background: linear-gradient(to top, var(--bg-main) 60%, transparent);
+        }
+        .input-bar {
+            max-width: 900px; margin: 0 auto;
+            background: white; border-radius: 30px;
+            padding: 10px 15px 10px 10px;
+            display: flex; align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border: 2px solid transparent; transition: 0.3s;
+        }
+        .input-bar:focus-within { border-color: var(--primary-color); }
+        html[dir="ltr"] .input-bar { padding: 10px 10px 10px 15px; }
+
+        #user-input {
+            flex: 1; border: none; background: transparent;
+            padding: 12px; font-family: inherit; font-size: 1.05rem; outline: none;
+        }
+        #send-btn {
+            width: 50px; height: 50px;
+            background: var(--primary-color); color: white;
+            border: none; border-radius: 50%;
+            cursor: pointer; font-size: 24px;
+            display: flex; justify-content: center; align-items: center;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(206, 17, 38, 0.3);
+        }
+        #send-btn:hover { transform: scale(1.1) rotate(-10deg); background: var(--primary-dark); }
+        html[dir="ltr"] #send-btn { transform: rotate(180deg); }
+        html[dir="ltr"] #send-btn:hover { transform: scale(1.1) rotate(170deg); }
+
+        .message-bubble a {
+            color: var(--primary-color); font-weight: 700; text-decoration: none;
+            border-bottom: 2px solid rgba(206, 17, 38, 0.2); transition: 0.2s;
+        }
+        .message-bubble a:hover { border-bottom-color: var(--primary-color); }
+
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div>
+            <div class="brand-area">
+                <div class="logo-container">
+                    <img src="nashama_bot.png" alt="Nashama Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <i class="ri-robot-2-fill fallback-logo-icon" style="display: none;"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Nashama Bot</h1>
+                    <span class="badge" id="version-badge">PRO نسخة</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="nav-label" id="menu-label">القائمة الرئيسية</div>
+                <div class="nav-item active">
+                    <i class="ri-chat-smile-2-line"></i> <span id="new-chat-text">محادثة جديدة</span>
+                </div>
+                <div class="nav-item" style="opacity: 0.6; cursor: not-allowed;">
+                    <i class="ri-history-line"></i> <span id="history-text">السجل (قريباً)</span>
+                </div>
+                <div class="nav-item" style="opacity: 0.6; cursor: not-allowed;">
+                    <i class="ri-information-line"></i> <span id="about-text">عن البوت</span>
+                </div>
+            </nav>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="nav-label" id="settings-label">الإعدادات</div>
+            <div class="settings-group">
+                <button class="lang-toggle-btn active" id="btn-ar" onclick="setLanguage('ar')">عربي</button>
+                <button class="lang-toggle-btn" id="btn-en" onclick="setLanguage('en')">English</button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="chat-header">
+            <div class="model-info">
+                <h2>
+                    <span class="live-indicator"></span>
+                    <span id="model-name-text">النشامى GPT-Jo</span>
+                </h2>
+            </div>
+            <div>
+                <i class="ri-more-2-fill" style="color: #999; cursor: pointer; font-size: 1.2rem;"></i>
+            </div>
+        </header>
+
+        <div id="chat-viewport">
+            <div class="message-group bot">
+                <div class="avatar-box"><i class="ri-robot-2-fill"></i></div>
+                <div class="message-bubble" id="welcome-msg">
+                    يا هلا! أنا رفيقك الذكي في الأردن. 🇯🇴<br>
+                    اسألني عن أي شيء؛ تاريخ، سياحة، أو حتى سواليف عامة!
+                </div>
+            </div>
+        </div>
+
+        <div class="input-dock">
+            <div class="input-bar">
+                <input type="text" id="user-input" placeholder="اكتب رسالتك هنا..." autocomplete="off">
+                <button id="send-btn"><i class="ri-send-plane-2-fill"></i></button>
+            </div>
+        </div>
+    </main>
+
+<script>
+    const chatViewport = document.getElementById('chat-viewport');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    const translations = {
+        ar: {
+            placeholder: "اكتب رسالتك هنا...",
+            welcome: "يا هلا! أنا رفيقك الذكي في الأردن. 🇯🇴<br>اسألني عن أي شيء؛ تاريخ، سياحة، أو حتى سواليف عامة!",
+            newChat: "محادثة جديدة",
+            history: "السجل (قريباً)",
+            about: "عن البوت",
+            menuLabel: "القائمة الرئيسية",
+            settingsLabel: "الإعدادات",
+            version: "PRO نسخة",
+            modelName: "النشامى GPT-Jo",
+            dbSource: "موثق من النظام",
+            webSource: "بحث إنترنت"
+        },
+        en: {
+            placeholder: "Type your message here...",
+            welcome: "Hello! I'm your smart companion in Jordan. 🇯🇴<br>Ask me anything about history, tourism, or just chat!",
+            newChat: "New Chat",
+            history: "History (Soon)",
+            about: "About Bot",
+            menuLabel: "Main Menu",
+            settingsLabel: "Settings",
+            version: "PRO Version",
+            modelName: "Nashama GPT-Jo",
+            dbSource: "Verified from DB",
+            webSource: "Internet Search"
+        }
+    };
+
+    let currentLang = 'ar';
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        const html = document.documentElement;
+        const isRTL = lang === 'ar';
+        
+        html.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
+        
+        document.getElementById('btn-ar').classList.toggle('active', isRTL);
+        document.getElementById('btn-en').classList.toggle('active', !isRTL);
+
+        const t = translations[lang];
+        userInput.placeholder = t.placeholder;
+        document.getElementById('welcome-msg').innerHTML = t.welcome;
+        document.getElementById('new-chat-text').textContent = t.newChat;
+        document.getElementById('history-text').textContent = t.history;
+        document.getElementById('about-text').textContent = t.about;
+        document.getElementById('menu-label').textContent = t.menuLabel;
+        document.getElementById('settings-label').textContent = t.settingsLabel;
+        document.getElementById('version-badge').textContent = t.version;
+        document.getElementById('model-name-text').textContent = t.modelName;
+    }
+
+    function linkify(text) {
+        return text.replace(/(https?:\/\/[^\s]+)/g, url => `<a href="${url}" target="_blank">${url}</a>`);
+    }
+
+    async function sendMessage() {
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        appendMsg(text, 'user');
+        userInput.value = '';
+        userInput.focus();
+        
+        const typingId = showTyping();
+
+        try {
+            const res = await fetch('http://127.0.0.1:5000/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: text })
+            });
+            const data = await res.json();
+            
+            removeTyping(typingId);
+
+            const t = translations[currentLang];
+            let sourceMeta = data.source === 'database' 
+                ? `<i class="ri-database-2-line"></i> ${t.dbSource}` 
+                : `<i class="ri-earth-line"></i> ${t.webSource}`;
+
+            let formatted = linkify(data.answer).replace(/\n/g, '<br>') + 
+                            `<div class="meta-info">${sourceMeta}</div>`;
+
+            appendMsg(formatted, 'bot', true);
+            
+        } catch (err) {
+            removeTyping(typingId);
+            appendMsg("خطأ في الاتصال بالسيرفر! تأكد من تشغيل البايثون. ⚠️", 'bot');
+        }
+    }
+
+    function appendMsg(text, sender, isHtml = false) {
+        const div = document.createElement('div');
+        div.className = `message-group ${sender}`;
+        
+        let icon = sender === 'bot' ? 'ri-robot-2-fill' : 'ri-user-3-fill';
+        let content = isHtml ? text : text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        div.innerHTML = `
+            <div class="avatar-box"><i class="${icon}"></i></div>
+            <div class="message-bubble">${content}</div>
+        `;
+        chatViewport.appendChild(div);
+        chatViewport.scrollTop = chatViewport.scrollHeight;
+    }
+
+    function showTyping() {
+        const id = 'typing-' + Date.now();
+        const div = document.createElement('div');
+        div.className = 'message-group bot';
+        div.id = id;
+        div.innerHTML = `
+            <div class="avatar-box"><i class="ri-robot-2-fill"></i></div>
+            <div class="message-bubble" style="padding: 12px 18px;">
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
+        `;
+        chatViewport.appendChild(div);
+        chatViewport.scrollTop = chatViewport.scrollHeight;
+        return id;
+    }
+
+    function removeTyping(id) {
+        const el = document.getElementById(id);
+        if (el) el.remove();
+    }
+
+    sendBtn.onclick = sendMessage;
+    userInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+
+    setLanguage('ar');
+</script>
+
+</body>
+</html>
