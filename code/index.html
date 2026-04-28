@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nashama Bot | AI Guide</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* لوحة ألوان فخمة جداً */
+            --primary: #ce1126; /* أحمر أردني أصيل */
+            --primary-hover: #b91c1c;
+            --sidebar-bg: #0b1121; /* كحلي ليلي فخم */
+            --sidebar-hover: #1e293b;
+            --chat-bg: #f9fafb; /* أبيض لؤلؤي مريح */
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --text-light: #f8fafc;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --shadow-float: 0 10px 40px -10px rgba(0,0,0,0.08);
+            --shadow-bubble: 0 4px 6px rgba(0,0,0,0.02);
+            --radius-xl: 28px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Tajawal', sans-serif; 
+            height: 100vh; 
+            display: flex; 
+            background-color: var(--chat-bg); 
+            overflow: hidden; 
+            color: var(--text-main);
+        }
+        
+        html[dir="ltr"] body { font-family: 'Inter', sans-serif; }
+
+        /* ================= Sidebar (القائمة الجانبية) ================= */
+        .sidebar { 
+            width: 320px; 
+            background-color: var(--sidebar-bg); 
+            color: var(--text-light); 
+            display: flex; 
+            flex-direction: column; 
+            padding: 30px 20px; 
+            transition: 0.3s;
+            z-index: 20;
+            border-left: 1px solid var(--glass-border);
+        }
+        
+        .brand-area { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px; margin-bottom: 35px; }
+        
+        .logo-box { 
+            width: 140px; height: 140px; 
+            border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 20px rgba(206, 17, 38, 0.3); /* توهج أحمر فخم */
+        }
+        .logo-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        
+        .brand-text h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: 0.5px; background: linear-gradient(to right, #fff, #cbd5e1); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .brand-text span { font-size: 1rem; color: #94a3b8; font-weight: 500; }
+
+        .new-chat-btn { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; background: var(--primary); color: white; border-radius: 16px; cursor: pointer; font-weight: 700; font-size: 1.05rem; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(206, 17, 38, 0.3); }
+        .new-chat-btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(206, 17, 38, 0.4); }
+        .new-chat-btn i { font-size: 1.3rem; }
+
+        /* سجل المحادثات */
+        .history-container { flex: 1; overflow-y: auto; margin-top: 30px; padding-right: 5px; }
+        .history-container::-webkit-scrollbar { width: 4px; }
+        .history-container::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .history-title { font-size: 0.8rem; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;}
+        .clear-history { cursor: pointer; color: #64748b; transition: 0.2s; font-size: 1.1rem; padding: 5px; border-radius: 6px; }
+        .clear-history:hover { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        
+        .history-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: #cbd5e1; border-radius: 12px; cursor: pointer; font-size: 0.95rem; margin-bottom: 8px; transition: 0.2s; border: 1px solid transparent; }
+        .history-item:hover { background: rgba(255,255,255,0.03); color: white; border-color: rgba(255,255,255,0.05); }
+        .history-item i { color: #64748b; font-size: 1.1rem; }
+        .history-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+
+        /* القائمة السفلية */
+        .bottom-nav { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--glass-border); }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: #cbd5e1; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 1rem; transition: 0.2s; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-item i { font-size: 1.3rem; color: #94a3b8; }
+
+        /* ================= Main Content (الواجهة الرئيسية) ================= */
+        .main-content { flex: 1; display: flex; flex-direction: column; position: relative; }
+        
+        .chat-header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: rgba(249, 250, 251, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid #f1f5f9; z-index: 10; }
+        .bot-status { display: flex; align-items: center; gap: 12px; }
+        .status-dot { width: 10px; height: 10px; background: #10b981; border-radius: 50%; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); }
+        .chat-header h2 { font-size: 1.25rem; font-weight: 800; color: var(--text-main); }
+
+        /* زر تغيير اللغة المبتكر (كبسولة) */
+        .lang-toggle-wrapper {
+            display: flex; align-items: center; gap: 8px;
+            background: white; border: 1px solid #e2e8f0; border-radius: 30px;
+            padding: 6px 14px; cursor: pointer; transition: 0.3s;
+            box-shadow: var(--shadow-bubble);
+            font-weight: 700; color: var(--text-main); font-size: 0.95rem;
+        }
+        .lang-toggle-wrapper:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: translateY(-1px); }
+        .lang-toggle-wrapper i { color: var(--primary); font-size: 1.2rem; }
+
+        /* ================= Chat Area ================= */
+        #chat-viewport { flex: 1; padding: 40px 10%; overflow-y: auto; display: flex; flex-direction: column; gap: 35px; scroll-behavior: smooth; }
+        
+        .message-group { display: flex; gap: 15px; max-width: 85%; animation: slideUp 0.4s ease forwards; opacity: 0; transform: translateY(15px); }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+        
+        .message-group.bot { align-self: flex-start; }
+        .message-group.user { align-self: flex-end; flex-direction: row-reverse; }
+        
+        .avatar { width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+        .bot .avatar { background: white; color: var(--primary); border: 1px solid #e2e8f0; box-shadow: var(--shadow-bubble); }
+        .user .avatar { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(206, 17, 38, 0.2); }
+        
+        .message-bubble { padding: 18px 24px; font-size: 1.05rem; line-height: 1.7; box-shadow: var(--shadow-bubble); }
+        .bot .message-bubble { background: white; color: var(--text-main); border-radius: 8px 24px 24px 24px; border: 1px solid #f1f5f9; }
+        .user .message-bubble { background: var(--primary); color: white; border-radius: 24px 8px 24px 24px; }
+        html[dir="ltr"] .bot .message-bubble { border-radius: 24px 8px 24px 24px; }
+        html[dir="ltr"] .user .message-bubble { border-radius: 8px 24px 24px 24px; }
+
+        /* ================= Input Area (شريط الإدخال العائم) ================= */
+        .input-dock { padding: 15px 10% 40px; background: linear-gradient(to top, var(--chat-bg) 80%, transparent); }
+        .input-bar { background: white; border-radius: 30px; padding: 8px 8px 8px 24px; display: flex; align-items: center; box-shadow: var(--shadow-float); border: 1px solid #e2e8f0; transition: all 0.3s ease; }
+        html[dir="ltr"] .input-bar { padding: 8px 24px 8px 8px; }
+        .input-bar:focus-within { border-color: var(--primary); box-shadow: 0 15px 35px -5px rgba(206, 17, 38, 0.1); }
+        
+        #user-input { flex: 1; border: none; background: transparent; padding: 12px 0; font-family: inherit; font-size: 1.05rem; outline: none; color: var(--text-main); }
+        #user-input::placeholder { color: #94a3b8; }
+        
+        .action-btns { display: flex; gap: 8px; align-items: center; }
+        #mic-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: #94a3b8; font-size: 22px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        #mic-btn:hover { background: #f1f5f9; color: var(--primary); }
+        #mic-btn.recording { background: #fee2e2; color: var(--primary); animation: pulse-red 1.5s infinite; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(206, 17, 38, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(206, 17, 38, 0); } 100% { box-shadow: 0 0 0 0 rgba(206, 17, 38, 0); } }
+        
+        #send-btn { width: 48px; height: 48px; border-radius: 50%; border: none; background: var(--primary); color: white; font-size: 22px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(206, 17, 38, 0.3); margin-right: 5px; }
+        html[dir="ltr"] #send-btn { margin-right: 0; margin-left: 5px; }
+        #send-btn:hover { background: var(--primary-hover); transform: scale(1.05); }
+
+        /* ================= Modals (النوافذ المنبثقة) ================= */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); }
+        .modal-content { background-color: white; margin: 12vh auto; padding: 40px; border-radius: var(--radius-xl); width: 90%; max-width: 450px; position: relative; box-shadow: var(--shadow-float); animation: modalScale 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes modalScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .close-btn { position: absolute; top: 20px; right: 20px; width: 35px; height: 35px; background: #f8fafc; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 22px; cursor: pointer; transition: 0.2s; border: 1px solid #e2e8f0;}
+        html[dir="ltr"] .close-btn { right: auto; left: 20px; }
+        .close-btn:hover { background: #fee2e2; color: var(--primary); border-color: #fca5a5; }
+
+        /* تنسيق بروفايل المبرمجة */
+        .dev-profile { text-align: center; }
+        .dev-img-container { width: 130px; height: 130px; margin: 0 auto 20px; border-radius: 50%; padding: 5px; background: linear-gradient(135deg, var(--primary), #fca5a5); box-shadow: 0 10px 25px rgba(206, 17, 38, 0.25); }
+        
+        .dev-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 4px solid white; }
+        
+        .dev-profile h2 { color: var(--text-main); font-weight: 800; font-size: 1.6rem; margin-bottom: 5px; }
+        .dev-profile p.title { color: var(--primary); font-weight: 700; font-size: 1.05rem; margin-bottom: 15px;}
+        .dev-profile p.desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
+        .dev-badge { display: inline-flex; align-items: center; gap: 8px; background: #f8fafc; color: var(--text-main); padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; margin-top: 25px; border: 1px solid #e2e8f0; }
+
+        /* تأثير الكتابة (Typing) */
+        .typing-dots { display: flex; gap: 6px; padding: 5px; }
+        .typing-dots span { width: 8px; height: 8px; background: #cbd5e1; border-radius: 50%; animation: blink 1.4s infinite ease-in-out both; }
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes blink { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; background: var(--primary); } }
+    </style>
+</head>
+<body>
+
+    <div id="aboutModal" class="modal">
+        <div class="modal-content">
+            <div class="close-btn" onclick="closeModal('aboutModal')"><i class="ri-close-line"></i></div>
+            <div class="dev-profile">
+                <div class="dev-img-container">
+                    <img src="myphoto.png" alt="Rania Al-Omari" class="dev-img" onerror="this.src='https://ui-avatars.com/api/?name=Rania+AlOmari&background=ce1126&color=fff&size=200&bold=true'">
+                </div>
+                <h2>رانيا خليفة العمري</h2>
+                <p class="title">مُطورة ومصممة النظام الذكي</p>
+                <p class="desc">
+                   صنع هذا المشروع كبداية نجاح و لترسيخ التراث و من طالبة تعتز بوطنها
+                </p>
+                <div class="dev-badge"><i class="ri-code-s-slash-line" style="color: var(--primary);"></i> BTEC AI Project 🇯🇴</div>
+            </div>
+        </div>
+    </div>
+
+    <aside class="sidebar">
+        <div>
+            <div class="brand-area">
+                <div class="logo-box">
+                    <img src="nashama_bot.png" alt="Nashama Bot" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <i class="ri-robot-2-fill" style="display: none;"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Nashama Bot</h1>
+                    <span>AI Tourist Guide</span>
+                </div>
+            </div>
+
+            <div class="new-chat-btn" onclick="startNewChat()">
+                <i class="ri-add-line"></i> <span id="new-chat-text">محادثة جديدة</span>
+            </div>
+
+            <div class="history-container">
+                <div class="history-title">
+                    <span id="history-label">سجل المحادثات</span>
+                    <i class="ri-delete-bin-line clear-history" onclick="clearHistory()" title="مسح السجل"></i>
+                </div>
+                <div id="history-list">
+                    </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item" onclick="openModal('aboutModal')">
+                <i class="ri-user-star-line"></i> <span id="about-text">عن المبرمجة</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="chat-header">
+            <div class="bot-status">
+                <div class="status-dot"></div>
+                <h2>النشامى GPT</h2>
+            </div>
+            
+            <div class="lang-toggle-wrapper" onclick="toggleLanguage()" id="lang-btn">
+                <i class="ri-global-line"></i>
+                <span id="lang-text">English</span>
+            </div>
+        </header>
+
+        <div id="chat-viewport">
+            </div>
+
+        <div class="input-dock">
+            <div class="input-bar">
+                <input type="text" id="user-input" placeholder="اكتب سؤالك السياحي هنا..." autocomplete="off">
+                <div class="action-btns">
+                    <button id="mic-btn" title="تحدث بالصوت"><i class="ri-mic-2-line"></i></button>
+                    <button id="send-btn"><i class="ri-send-plane-2-fill"></i></button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script>
+    const translations = {
+        ar: { newChat: "محادثة جديدة", aboutText: "عن المبرمجة", placeholder: "اكتب سؤالك السياحي هنا...", historyLabel: "سجل المحادثات", welcomeMsg: "يا هلا بك! أنا رانيا، دليلك السياحي الذكي لليوم في الأردن. 🇯🇴<br>اسألني عن الأماكن الأثرية، المطاعم، أو أي تفاصيل سياحية تعجبك!" },
+        en: { newChat: "New Chat", aboutText: "About Developer", placeholder: "Type your tourist question here...", historyLabel: "Chat History", welcomeMsg: "Hello! I'm Rania, your smart tourist guide in Jordan today. 🇯🇴<br>Ask me about historical places, restaurants, or anything you need!" }
+    };
+
+    let currentLang = 'ar';
+    const chatViewport = document.getElementById('chat-viewport');
+    const userInput = document.getElementById('user-input');
+    const micBtn = document.getElementById('mic-btn');
+    const historyList = document.getElementById('history-list');
+
+    // ================= نظام السجل (Chat History) =================
+    let chatHistory = JSON.parse(localStorage.getItem('nashamaHistory')) || [];
+
+    function saveMessage(text, sender, isHtml = false) {
+        chatHistory.push({ text, sender, isHtml });
+        localStorage.setItem('nashamaHistory', JSON.stringify(chatHistory));
+        updateHistorySidebar();
+    }
+
+    function loadHistory() {
+        chatViewport.innerHTML = '';
+        if (chatHistory.length === 0) {
+            appendMsgUI(translations[currentLang].welcomeMsg, 'bot', true);
+        } else {
+            chatHistory.forEach(msg => appendMsgUI(msg.text, msg.sender, msg.isHtml));
+        }
+        updateHistorySidebar();
+    }
+
+    function updateHistorySidebar() {
+        historyList.innerHTML = '';
+        const userQuestions = chatHistory.filter(m => m.sender === 'user').reverse().slice(0, 10);
+        userQuestions.forEach(q => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `<i class="ri-chat-3-line"></i> <span class="history-text">${q.text}</span>`;
+            historyList.appendChild(div);
+        });
+    }
+
+    function startNewChat() {
+        chatHistory = [];
+        localStorage.removeItem('nashamaHistory');
+        loadHistory();
+    }
+
+    function clearHistory() {
+        if(confirm(currentLang === 'ar' ? 'هل أنت متأكد من مسح جميع المحادثات؟' : 'Are you sure you want to clear history?')) {
+            startNewChat();
+        }
+    }
+
+    // ================= إرسال وعرض الرسائل =================
+    function appendMsgUI(text, sender, isHtml = false) {
+        const div = document.createElement('div');
+        div.className = `message-group ${sender}`;
+        let icon = sender === 'bot' ? 'ri-robot-2-fill' : 'ri-user-3-fill';
+        let content = isHtml ? text : text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        
+        div.innerHTML = `<div class="avatar"><i class="${icon}"></i></div><div class="message-bubble">${content}</div>`;
+        chatViewport.appendChild(div);
+        chatViewport.scrollTop = chatViewport.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        appendMsgUI(text, 'user');
+        saveMessage(text, 'user');
+        userInput.value = '';
+        
+        const typingId = showTyping();
+
+        try {
+            const res = await fetch('http://127.0.0.1:5000/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: text })
+            });
+            
+            if (!res.ok) throw new Error('Network error');
+            const data = await res.json();
+            removeTyping(typingId);
+
+            let formatted = data.answer.replace(/(https?:\/\/[^\s]+)/g, url => `<a href="${url}" target="_blank" style="color:var(--primary); font-weight:bold;">${url}</a>`).replace(/\n/g, '<br>');
+            
+            // تم إزالة كود نسبة التطابق بناءً على طلبك
+            let finalOutput = formatted;
+
+            appendMsgUI(finalOutput, 'bot', true);
+            saveMessage(finalOutput, 'bot', true);
+
+        } catch (err) {
+            removeTyping(typingId);
+            appendMsgUI(currentLang === 'ar' ? "عذراً، لم أتمكن من الاتصال بالخادم. تأكدي من تشغيل البايثون." : "Server connection failed.", 'bot');
+        }
+    }
+
+    function showTyping() {
+        const id = 'typing-' + Date.now();
+        const div = document.createElement('div');
+        div.className = 'message-group bot';
+        div.id = id;
+        div.innerHTML = `<div class="avatar"><i class="ri-robot-2-fill"></i></div><div class="message-bubble" style="padding: 12px 20px;"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+        chatViewport.appendChild(div);
+        chatViewport.scrollTop = chatViewport.scrollHeight;
+        return id;
+    }
+
+    function removeTyping(id) { const el = document.getElementById(id); if (el) el.remove(); }
+
+    document.getElementById('send-btn').onclick = sendMessage;
+    userInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+
+    // ================= الصوت والنوافذ واللغة =================
+    function openModal(modalId) { document.getElementById(modalId).style.display = "block"; }
+    function closeModal(modalId) { document.getElementById(modalId).style.display = "none"; }
+    window.onclick = function(event) { if (event.target.classList.contains('modal')) event.target.style.display = "none"; }
+
+    let recognition;
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        
+        recognition.onstart = () => micBtn.classList.add("recording");
+        recognition.onresult = (e) => userInput.value = e.results[0][0].transcript;
+        recognition.onerror = () => micBtn.classList.remove("recording");
+        recognition.onend = () => micBtn.classList.remove("recording");
+    } else {
+        micBtn.style.display = "none";
+    }
+
+    micBtn.onclick = () => {
+        if (recognition) {
+            recognition.lang = currentLang === 'ar' ? 'ar-JO' : 'en-US';
+            recognition.start();
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+        
+        document.getElementById('lang-text').innerText = currentLang === 'ar' ? 'English' : 'عربي';
+
+        const t = translations[currentLang];
+        document.getElementById('new-chat-text').innerText = t.newChat;
+        document.getElementById('about-text').innerText = t.aboutText;
+        document.getElementById('history-label').innerText = t.historyLabel;
+        document.getElementById('user-input').placeholder = t.placeholder;
+    }
+
+    // تشغيل عند البدء
+    window.onload = loadHistory;
+</script>
+</body>
+</html>
